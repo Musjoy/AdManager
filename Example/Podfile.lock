@@ -1,0 +1,20 @@
+PODS:
+  - AdManager (0.1.0):
+    - Google-Mobile-Ads-SDK (~> 7.7.1)
+    - ModuleCapability (~> 0.1.1)
+  - Google-Mobile-Ads-SDK (7.7.1)
+  - ModuleCapability (0.1.1)
+
+DEPENDENCIES:
+  - AdManager (from `../`)
+
+EXTERNAL SOURCES:
+  AdManager:
+    :path: ../
+
+SPEC CHECKSUMS:
+  AdManager: f49db715e17f80678173ab3d843fd250d456811d
+  Google-Mobile-Ads-SDK: e27569901b58881d9a94b42f2c642739cfe3970a
+  ModuleCapability: c58431991173e091993386b1840082a2540f2de1
+
+COCOAPODS: 0.39.0

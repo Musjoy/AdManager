@@ -1,4 +1,4 @@
-use_frameworks!
+#use_frameworks!
 
 target 'AdManager_Example', :exclusive => true do
   pod 'AdManager', :path => '../'

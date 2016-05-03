@@ -46,6 +46,8 @@ fi
 			<string>1</string>
 			<key>isa</key>
 			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>net.daringfireball.markdown</string>
 			<key>name</key>
 			<string>README.md</string>
 			<key>path</key>
@@ -91,13 +93,6 @@ fi
 </string>
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
-		</dict>
-		<key>534D3A72AD4DA31B8AF58FBC</key>
-		<dict>
-			<key>fileRef</key>
-			<string>C64760299158FF8E1F712986</string>
-			<key>isa</key>
-			<string>PBXBuildFile</string>
 		</dict>
 		<key>5ABA36FBD43A5D0706A5F5F2</key>
 		<dict>
@@ -218,7 +213,7 @@ fi
 				<string>6003F590195388D20070C39A</string>
 				<string>6003F592195388D20070C39A</string>
 				<string>6003F58E195388D20070C39A</string>
-				<string>7407E3B9DAB38A83FA2DFBAF</string>
+				<string>746F8FAE17CC24D23D0122FF</string>
 			</array>
 			<key>isa</key>
 			<string>PBXFrameworksBuildPhase</string>
@@ -303,8 +298,8 @@ fi
 				<string>6003F58F195388D20070C39A</string>
 				<string>6003F591195388D20070C39A</string>
 				<string>6003F5AF195388D20070C39A</string>
-				<string>96B6D79D0C1AF3F55555E53B</string>
-				<string>C64760299158FF8E1F712986</string>
+				<string>9A255158BB7820DBAE9AAE94</string>
+				<string>F9B313EC70A4640F3D0FE6CF</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -581,7 +576,7 @@ fi
 				<string>6003F5B0195388D20070C39A</string>
 				<string>6003F5B2195388D20070C39A</string>
 				<string>6003F5B1195388D20070C39A</string>
-				<string>534D3A72AD4DA31B8AF58FBC</string>
+				<string>7FB949C4A9DC3FC288AD2963</string>
 			</array>
 			<key>isa</key>
 			<string>PBXFrameworksBuildPhase</string>
@@ -963,7 +958,7 @@ fi
 				<key>MODULE_NAME</key>
 				<string>ExampleApp</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}</string>
+				<string>com.musjoy.demo.AdManager-Example</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>WRAPPER_EXTENSION</key>
@@ -993,7 +988,7 @@ fi
 				<key>MODULE_NAME</key>
 				<string>ExampleApp</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
-				<string>org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}</string>
+				<string>com.musjoy.demo.AdManager-Example</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>WRAPPER_EXTENSION</key>
@@ -1141,10 +1136,10 @@ fi
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
 		</dict>
-		<key>7407E3B9DAB38A83FA2DFBAF</key>
+		<key>746F8FAE17CC24D23D0122FF</key>
 		<dict>
 			<key>fileRef</key>
-			<string>96B6D79D0C1AF3F55555E53B</string>
+			<string>9A255158BB7820DBAE9AAE94</string>
 			<key>isa</key>
 			<string>PBXBuildFile</string>
 		</dict>
@@ -1154,6 +1149,8 @@ fi
 			<string>1</string>
 			<key>isa</key>
 			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text</string>
 			<key>name</key>
 			<string>AdManager.podspec</string>
 			<key>path</key>
@@ -1175,6 +1172,13 @@ fi
 			<string>Pods/Target Support Files/Pods-AdManager_Example/Pods-AdManager_Example.debug.xcconfig</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
+		</dict>
+		<key>7FB949C4A9DC3FC288AD2963</key>
+		<dict>
+			<key>fileRef</key>
+			<string>F9B313EC70A4640F3D0FE6CF</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>868AE73861DB388BC41F4624</key>
 		<dict>
@@ -1220,16 +1224,16 @@ fi
 			<key>isa</key>
 			<string>PBXBuildFile</string>
 		</dict>
-		<key>96B6D79D0C1AF3F55555E53B</key>
+		<key>9A255158BB7820DBAE9AAE94</key>
 		<dict>
 			<key>explicitFileType</key>
-			<string>wrapper.framework</string>
+			<string>archive.ar</string>
 			<key>includeInIndex</key>
 			<string>0</string>
 			<key>isa</key>
 			<string>PBXFileReference</string>
 			<key>path</key>
-			<string>Pods_AdManager_Example.framework</string>
+			<string>libPods-AdManager_Example.a</string>
 			<key>sourceTree</key>
 			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
@@ -1269,25 +1273,14 @@ fi
 			<string>1</string>
 			<key>isa</key>
 			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text</string>
 			<key>name</key>
 			<string>LICENSE</string>
 			<key>path</key>
 			<string>../LICENSE</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
-		</dict>
-		<key>C64760299158FF8E1F712986</key>
-		<dict>
-			<key>explicitFileType</key>
-			<string>wrapper.framework</string>
-			<key>includeInIndex</key>
-			<string>0</string>
-			<key>isa</key>
-			<string>PBXFileReference</string>
-			<key>path</key>
-			<string>Pods_AdManager_Tests.framework</string>
-			<key>sourceTree</key>
-			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
 		<key>CE9955BF762CCC257F0DE441</key>
 		<dict>
@@ -1343,6 +1336,19 @@ fi
 			<string>Pods/Target Support Files/Pods-AdManager_Example/Pods-AdManager_Example.release.xcconfig</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
+		</dict>
+		<key>F9B313EC70A4640F3D0FE6CF</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>archive.ar</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>libPods-AdManager_Tests.a</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
 	</dict>
 	<key>rootObject</key>
