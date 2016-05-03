@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'AdManager_Example', :exclusive => true do
+  pod 'AdManager', :path => '../'
+end
+
+target 'AdManager_Tests', :exclusive => true do
+  pod 'AdManager', :path => '../'
+
+  
+end
