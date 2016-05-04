@@ -332,7 +332,12 @@ static AdManager *s_adManager = nil;
         return NO;
     }
     LogTrace(@">>>> Interstitial Ad Did Show");
-    triggerEvent(stat_ShowCountInterstitialAd, @{@"name":adKey});
+    AdInfo *aAdInfo = _dicAdInfos[adKey];
+    NSString *adName = aAdInfo.adName;
+    if (adName.length == 0) {
+        adName = adKey;
+    }
+    triggerEvent(stat_ShowCountInterstitialAd, @{@"name":adName});
 
 
     [adInterstitial presentFromRootViewController:[self.class topViewController]];
@@ -437,7 +442,12 @@ static AdManager *s_adManager = nil;
         return NO;
     }
     LogTrace(@">>>> Rewarded Ad Did Show");
-    triggerEvent(stat_ShowCountRewardedAd, @{@"name":adKey});
+    AdInfo *aAdInfo = _dicAdInfos[adKey];
+    NSString *adName = aAdInfo.adName;
+    if (adName.length == 0) {
+        adName = adKey;
+    }
+    triggerEvent(stat_ShowCountRewardedAd, @{@"name":adName});
     
     if (completion) {
         NSDictionary *aDic = @{kRewardedCallback:completion};
