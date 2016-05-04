@@ -18,7 +18,7 @@
 #endif
 
 
-#ifdef MODULE_INAPP_PURCHASE
+#ifdef MODULE_IAP_MANAGER
 #import "IAPManager.h"
 #endif
 
@@ -109,7 +109,7 @@ static AdManager *s_adManager = nil;
         _dicAdCounts = [[NSMutableDictionary alloc] init];
         _dicAdRequest = [[NSMutableDictionary alloc] init];
         
-#ifdef MODULE_INAPP_PURCHASE
+#ifdef MODULE_IAP_MANAGER
         [[IAPManager shareInstance] observeProduct:IAP_PRODUCT_REMOVE_ADS purchased:^(BOOL isSucceed, NSString *message, id result) {
             if (isSucceed) {
                 _canShowAd = NO;
@@ -226,7 +226,7 @@ static AdManager *s_adManager = nil;
         return;
     }
     // 是否在处理购买操作
-#ifdef MODULE_INAPP_PURCHASE
+#ifdef MODULE_IAP_MANAGER
     if ([[IAPManager shareInstance] isProcessing]) {
         return;
     }
@@ -317,7 +317,7 @@ static AdManager *s_adManager = nil;
     }
     
     // 是否在处理购买操作
-#ifdef MODULE_INAPP_PURCHASE
+#ifdef MODULE_IAP_MANAGER
     if ([[IAPManager shareInstance] isProcessing]) {
         return NO;
     }
@@ -579,7 +579,7 @@ static AdManager *s_adManager = nil;
     }
     
     // 是否在处理购买操作
-#ifdef MODULE_INAPP_PURCHASE
+#ifdef MODULE_IAP_MANAGER
     if ([[IAPManager shareInstance] isProcessing]) {
         return;
     }
