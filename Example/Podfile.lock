@@ -1,8 +1,8 @@
 PODS:
-  - AdManager (0.1.0):
-    - Google-Mobile-Ads-SDK (~> 7.7.1)
+  - AdManager (0.1.3):
+    - Google-Mobile-Ads-SDK (~> 7.8.0)
     - ModuleCapability (~> 0.1.1)
-  - Google-Mobile-Ads-SDK (7.7.1)
+  - Google-Mobile-Ads-SDK (7.8.0)
   - ModuleCapability (0.1.1)
 
 DEPENDENCIES:
@@ -13,8 +13,8 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  AdManager: f49db715e17f80678173ab3d843fd250d456811d
-  Google-Mobile-Ads-SDK: e27569901b58881d9a94b42f2c642739cfe3970a
+  AdManager: be512bcd8c531f134c8ad296e2a6045f0479d665
+  Google-Mobile-Ads-SDK: 36b88dd2373f0ee4583e65971cb07b6965c29eef
   ModuleCapability: c58431991173e091993386b1840082a2540f2de1
 
 COCOAPODS: 0.39.0
