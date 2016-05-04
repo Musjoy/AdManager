@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AdManager"
-  s.version          = "0.1.1"
+  s.version          = "0.1.2"
   s.summary          = "This is an manager for ads."
 
   s.homepage         = "https://github.com/Musjoy/AdManager"
@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
   s.source_files = 'AdManager/Classes/**/*'
 
   s.user_target_xcconfig = {
-    'GCC_PREPROCESSOR_DEFINITIONS' => 'MODULE_WEB_SERVICE'
+    'GCC_PREPROCESSOR_DEFINITIONS' => 'MODULE_AD_MANAGER'
   }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
