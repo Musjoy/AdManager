@@ -199,6 +199,11 @@ static AdManager *s_adManager = nil;
 - (DFPBannerView *)createBannerAd:(NSString *)adKey withSize:(GADAdSize)aSize receiveBlock:(AdVoidBlock)receiveBlock removeBlock:(AdVoidBlock)removeBlock
 {
     DFPBannerView *banner = (DFPBannerView *)[self prepareForAd:adKey];
+    if (banner == nil) {
+        triggerEventStr(stat_Error, [adKey stringByAppendingString:@" 无法创建"]);
+        LogError(@"创建banner广告 {%@} 失败", adKey);
+        return nil;
+    }
     [banner resize:aSize];
     if (receiveBlock || removeBlock) {
         NSMutableDictionary *aDic = [[NSMutableDictionary alloc] init];
