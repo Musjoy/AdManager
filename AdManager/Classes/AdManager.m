@@ -132,35 +132,49 @@ static AdManager *s_adManager = nil;
         self.reviewShowCount = [[NSUserDefaults standardUserDefaults] integerForKey:kReviewShowCount];
         self.reviewLastShowDate = [[NSUserDefaults standardUserDefaults] objectForKey:kReviewLastShowTime];
         
-        // 读取plist文件
-        NSDictionary *dicAdKeys = getPlistFileData(PLIST_AD_LIST);
-        if (dicAdKeys == nil
-            || (dicAdKeys && ![dicAdKeys isKindOfClass:[NSDictionary class]])) {
-            triggerEvent(stat_Error, @{@"name":@"读取广告plist错误"});
-        }
+        [self reloadData];
         
-        NSNumber *canshowAd = [dicAdKeys objectForKey:@"canShowAd"];
-        if (canshowAd && [canshowAd boolValue] == NO) {
-            self.canShowAd = NO;
-        }
-        NSMutableDictionary *dicAdInfos = [[NSMutableDictionary alloc] init];
-        NSDictionary *dicAds = [dicAdKeys objectForKey:@"adList"];
-        for (NSString *adKey in dicAds.allKeys) {
-            NSDictionary *dicAdInfo = dicAds[adKey];
-            AdInfo *adInfo = [[AdInfo alloc] initWithData:dicAdInfo];
-            adInfo.adKey = adKey;
-            [dicAdInfos setObject:adInfo forKey:adKey];
-            if (adInfo.adType == 3
-                || (adInfo.adType == 2 && (adInfo.forceLoad
-                                           || (_canShowAd && adInfo.autoLoad)))) {
-                [_arrNeedLoadAds addObject:adInfo];
-            }
-        }
-        self.dicAdInfos = dicAdInfos;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(reloadData)
+                                                     name:[kNoticPlistUpdate stringByAppendingString:PLIST_AD_LIST]
+                                                   object:nil];
     }
     return self;
 }
 
+#pragma mark - Notification Receive
+
+- (void)reloadData
+{
+    [_arrNeedLoadAds removeAllObjects];
+    // 读取plist文件
+    NSDictionary *dicAdKeys = getPlistFileData(PLIST_AD_LIST);
+    if (dicAdKeys == nil
+        || (dicAdKeys && ![dicAdKeys isKindOfClass:[NSDictionary class]])) {
+        self.canShowAd = NO;
+    }
+    
+    NSNumber *canshowAd = [dicAdKeys objectForKey:@"canShowAd"];
+    if (canshowAd && [canshowAd boolValue] == NO) {
+        self.canShowAd = NO;
+    }
+    NSMutableDictionary *dicAdInfos = [[NSMutableDictionary alloc] init];
+    NSDictionary *dicAds = [dicAdKeys objectForKey:@"adList"];
+    for (NSString *adKey in dicAds.allKeys) {
+        NSDictionary *dicAdInfo = dicAds[adKey];
+        AdInfo *adInfo = [[AdInfo alloc] initWithData:dicAdInfo];
+        adInfo.adKey = adKey;
+        [dicAdInfos setObject:adInfo forKey:adKey];
+        if (adInfo.adType == 3
+            || (adInfo.adType == 2 && (adInfo.forceLoad
+                                       || (_canShowAd && adInfo.autoLoad)))) {
+            [_arrNeedLoadAds addObject:adInfo];
+        }
+    }
+    self.dicAdInfos = dicAdInfos;
+}
+
+#pragma mark - Public
 
 - (void)startPrepare
 {
@@ -200,8 +214,10 @@ static AdManager *s_adManager = nil;
 {
     DFPBannerView *banner = (DFPBannerView *)[self prepareForAd:adKey];
     if (banner == nil) {
-        triggerEventStr(stat_Error, [adKey stringByAppendingString:@" 无法创建"]);
-        LogError(@"创建banner广告 {%@} 失败", adKey);
+        if (_dicAdInfos[adKey]) {
+            triggerEventStr(stat_Error, [adKey stringByAppendingString:@" 无法创建"]);
+            LogError(@"创建banner广告 {%@} 失败", adKey);
+        }        
         return nil;
     }
     [banner resize:aSize];
@@ -654,7 +670,9 @@ static AdManager *s_adManager = nil;
 - (void)interstitialDidReceiveAd:(GADInterstitial *)ad
 {
     NSString *adKey = [self adKeyForRequestAd:ad];
-    [_dicAdRequest removeObjectForKey:adKey];
+    if (adKey) {
+        [_dicAdRequest removeObjectForKey:adKey];
+    }
 }
 
 /// Called when an interstitial ad request completed without an interstitial to
@@ -662,9 +680,12 @@ static AdManager *s_adManager = nil;
 - (void)interstitial:(GADInterstitial *)ad didFailToReceiveAdWithError:(GADRequestError *)error
 {
     NSString *adKey = [self adKeyForRequestAd:ad];
-    [_dicAds removeObjectForKey:adKey];
-    [_dicAdRequest removeObjectForKey:adKey];
-    [self performSelector:@selector(prepareForAd:) withObject:adKey afterDelay:50];
+    if (adKey) {
+        [_dicAds removeObjectForKey:adKey];
+        [_dicAdRequest removeObjectForKey:adKey];
+        [self performSelector:@selector(prepareForAd:) withObject:adKey afterDelay:50];
+    }
+    
     LogError(@"Load Interstitial %@", error);
 }
 
@@ -695,7 +716,9 @@ static AdManager *s_adManager = nil;
 {
     NSLog(@"Received rewarded ad");
     NSString *adKey = [self adKeyForRequestAd:rewardBasedVideoAd];
-    [_dicAdRequest removeObjectForKey:adKey];
+    if (adKey) {
+        [_dicAdRequest removeObjectForKey:adKey];
+    }
 }
 
 /// Tells the delegate that the reward based video ad has failed to load.
@@ -703,9 +726,11 @@ static AdManager *s_adManager = nil;
     didFailToLoadWithError:(NSError *)error
 {
     NSString *adKey = [self adKeyForRequestAd:rewardBasedVideoAd];
-    [_dicAds removeObjectForKey:adKey];
-    [_dicAdRequest removeObjectForKey:adKey];
-    [self performSelector:@selector(prepareForAd:) withObject:adKey afterDelay:50];
+    if (adKey) {
+        [_dicAds removeObjectForKey:adKey];
+        [_dicAdRequest removeObjectForKey:adKey];
+        [self performSelector:@selector(prepareForAd:) withObject:adKey afterDelay:50];
+    }
     LogError(@"Load Rewarded %@", error);
 }
 
@@ -727,15 +752,17 @@ static AdManager *s_adManager = nil;
     _haveInterstitialAdShow = NO;
     [self performSelector:@selector(noticAdDismiss) withObject:nil afterDelay:0.5];
     NSString *adKey = [self adKeyForPrepareAd:rewardBasedVideoAd];
-    NSDictionary *aDic = _dicCallback[adKey];
-    if (aDic) {
-        AdVoidBlock rewardedCallback = aDic[kRewardedCallback];
-        if (rewardedCallback) {
-            rewardedCallback();
+    if (adKey) {
+        NSDictionary *aDic = _dicCallback[adKey];
+        if (aDic) {
+            AdVoidBlock rewardedCallback = aDic[kRewardedCallback];
+            if (rewardedCallback) {
+                rewardedCallback();
+            }
+            [_dicCallback removeObjectForKey:adKey];
         }
-        [_dicCallback removeObjectForKey:adKey];
+        [self reprepareForAd:adKey];
     }
-    [self reprepareForAd:adKey];
 }
 
 /// Tells the delegate that the reward based video ad will leave the application.

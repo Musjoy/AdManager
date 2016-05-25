@@ -10,7 +10,7 @@
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 #ifdef MODULE_UM_ANALYSE
-#import "MobClick.h"
+#import HEADER_UM_ANALYSE
 /// 插页广告
 #ifndef stat_ShowCountInterstitialAd
 #define stat_ShowCountInterstitialAd    @"ShowCountInterstitialAd"

@@ -16,6 +16,7 @@
     if (self) {
         self.adKey = aDic[@"adKey"];
         self.adId = aDic[@"adId"];
+        self.adName = aDic[@"adName"];
         self.adType = [aDic[@"adType"] intValue];
         self.autoLoad = [aDic[@"autoLoad"] boolValue];
         self.adActiveCount = [aDic[@"adActiveCount"] intValue];
