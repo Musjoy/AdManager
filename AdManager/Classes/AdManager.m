@@ -134,10 +134,12 @@ static AdManager *s_adManager = nil;
         
         [self reloadData];
         
+#ifdef MODULE_FILE_SOURCE
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(reloadData)
                                                      name:[kNoticPlistUpdate stringByAppendingString:PLIST_AD_LIST]
                                                    object:nil];
+#endif
     }
     return self;
 }
