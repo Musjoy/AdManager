@@ -69,6 +69,7 @@ static AdManager *s_adManager = nil;
 @property (nonatomic, strong) NSMutableArray *arrNeedLoadAds;   /**< 需要自动加载的广告列表 */
 
 // 评论相关
+@property (nonatomic, assign) BOOL canShowReview;               /**< 是否可以显示评论 */
 @property (nonatomic, assign) BOOL isReviewClick;               /**< 是否已点击评论 */
 @property (nonatomic, assign) BOOL reviewHadShow;               /**< 评论是否已经显示 */
 @property (nonatomic, assign) BOOL isReviewInShow;              /**< 评论弹窗是否正在显示 */
@@ -103,6 +104,7 @@ static AdManager *s_adManager = nil;
     self = [super init];
     if (self) {
         _canShowAd = YES;
+        _canShowReview = NO;
         _arrNeedLoadAds = [[NSMutableArray alloc] init];
         _dicAds = [[NSMutableDictionary alloc] init];
         _dicCallback = [[NSMutableDictionary alloc] init];
@@ -154,6 +156,8 @@ static AdManager *s_adManager = nil;
     if (dicAdKeys == nil
         || (dicAdKeys && ![dicAdKeys isKindOfClass:[NSDictionary class]])) {
         self.canShowAd = NO;
+        self.canShowReview = NO;
+        return;
     }
     
     NSNumber *canshowAd = [dicAdKeys objectForKey:@"canShowAd"];
@@ -174,6 +178,13 @@ static AdManager *s_adManager = nil;
         }
     }
     self.dicAdInfos = dicAdInfos;
+    
+    NSNumber *canShowReview = [dicAdKeys objectForKey:@"canShowReview"];
+    if (canShowReview && [canShowReview boolValue] == YES) {
+        self.canShowReview = YES;
+    } else {
+        self.canShowReview = NO;
+    }
 }
 
 #pragma mark - Public
@@ -584,6 +595,9 @@ static AdManager *s_adManager = nil;
 
 - (void)checkReviewIsShow
 {
+    if (!_canShowReview) {
+        return;
+    }
     if (_isReviewClick) {
         // 如果已经点击或，返回
         return;
