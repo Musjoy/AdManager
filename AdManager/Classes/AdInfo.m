@@ -22,6 +22,11 @@
         self.adActiveCount = [aDic[@"adActiveCount"] intValue];
         self.adMaxShowCount = [aDic[@"adMaxShowCount"] intValue];
         self.adResetTime = [aDic[@"adResetTime"] intValue];
+        if (aDic[@"adPreloadCount"]) {
+            self.adPreloadCount = [aDic[@"adPreloadCount"] intValue];
+        } else {
+            self.adPreloadCount = 1;
+        }
     }
     return self;
 }

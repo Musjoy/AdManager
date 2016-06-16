@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
+#import "AdInfo.h"
 
 #ifdef MODULE_UM_ANALYSE
 #import HEADER_UM_ANALYSE
@@ -62,6 +63,8 @@ typedef void (^AdVoidBlock)(void);
 /// 开始准备广告
 - (void)startPrepare;
 
+- (AdInfo *)adInfoForKey:(NSString *)adKey;
+
 #pragma mark - Banner
 
 /// 创建banner广告
@@ -97,6 +100,10 @@ typedef void (^AdVoidBlock)(void);
 - (BOOL)haveRewardedAd:(NSString *)adKey;
 /// 显示Rewarded广告，返回NO则广告未显示，completion不会被调用
 - (BOOL)showRewardedAd:(NSString *)adKey completion:(AdVoidBlock)completion;
+
+#pragma mark - Native Ad
+
+- (GADNativeExpressAdView *)popNativeAdForKey:(NSString *)adKey;
 
 #pragma mark - Review
 
