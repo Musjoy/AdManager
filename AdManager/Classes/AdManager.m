@@ -578,7 +578,6 @@ static AdManager *s_adManager = nil;
             adNative.delegate = self;
             adNative.rootViewController = [[self class] topViewController];
             GADRequest* request = [GADRequest request];
-            request.testDevices = @[ @"40f2428616992c9166401d6b8bbf9660" ];
             [_dicAdRequest setObject:adNative forKey:aAdInfo.adKey];
             [adNative loadRequest:request];
             aAd = adNative;
