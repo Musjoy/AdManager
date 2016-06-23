@@ -20,6 +20,9 @@
 #ifdef MODULE_IAP_MANAGER
 #import "IAPManager.h"
 #endif
+#ifdef MODULE_PROMOTION_MANAGER
+#import "PromotionManager.h"
+#endif
 
 #ifdef MODULE_WEB_SERVICE
 #import "MJWebService.h"
@@ -42,21 +45,6 @@
 #define INTERVAL_BETWEEN_REVIEW (24*60*60)
 /// 首次评论激活需要次数
 #define REVIEW_ACTIVE_COUNT 3
-
-///======== 推广
-/** 推广是否已经显示过 */
-#define kPromotionHadShow       @"PromotionHadShow"
-/** 推广计数次数 */
-#define kPromotionShowCount     @"PromotionShowCount"
-/** 推广上一次弹出时间 */
-#define kPromotionLastShowTime  @"PromotionLastShowTime"
-/** 是否已点击推广弹窗 */
-#define kPromotionIsClick       @"PromotionIsClick"
-/** 最后一次推广的app */
-#define kPromotionLastAppId     @"PromotionLastAppId"
-/** 首次评论激活需要次数 */
-#define PROMOTION_ACTIVE_COUNT 3
-
 
 /// 弹窗起始tag
 #define ALERT_TAG_START 200
@@ -97,15 +85,6 @@ static AdManager *s_adManager = nil;
 @property (nonatomic, assign) NSInteger reviewShowCount;        /**< 未显示过评论是的评论计数 */
 @property (nonatomic, strong) NSDate *reviewLastShowDate;       /**< 评论最后显示时间 */
 
-// 推广
-@property (nonatomic, assign) BOOL canShowPromotion;                /**< 是否可以显示推广 */
-@property (nonatomic, assign) BOOL isPromotionClick;                /**< 是否已点击推广 */
-@property (nonatomic, assign) BOOL promotionHadShow;                /**< 推广是否已经显示 */
-@property (nonatomic, assign) NSInteger promotionShowCount;         /**< 未显示过推广的计数 */
-@property (nonatomic, assign) NSInteger promotionActiveCount;       /**< 激活推广需要的次数 */
-@property (nonatomic, strong) NSDate *promotionLastShowDate;        /**< 推广最后显示时间 */
-@property (nonatomic, strong) NSString *promotionLastAppId;         /**< 最后一次推广的AppId */
-@property (nonatomic, strong) NSDictionary *dicPromotionInfo;       /**< 推广信息 */
 
 @property (nonatomic, assign) BOOL haveAlertShow;                ///< 是否有alert显示
 
@@ -173,14 +152,6 @@ static AdManager *s_adManager = nil;
                                                    object:nil];
 #endif
         
-#ifdef MODULE_LAUNCH_MANAGER
-        [LaunchManager registerLaunchAction:^{
-            [self fetchPromotionData];
-        }];
-#else
-        [self fetchPromotionData];
-#endif
-        
     }
     return self;
 }
@@ -242,7 +213,11 @@ static AdManager *s_adManager = nil;
     [[AdManager shareInstance] startPrepare];
     [[AdManager shareInstance] checkReviewIsShow];
     [[AdManager shareInstance] checkInterstitialAd:KEY_AD_INTERSTITIAL_LAUNCH];
-    [[AdManager shareInstance] checkPromotion];
+}
+
+- (BOOL)haveAnythingInShow
+{
+    return _haveInterstitialAdShow||_haveAlertShow;
 }
 
 - (AdInfo *)adInfoForKey:(NSString *)adKey
@@ -313,6 +288,11 @@ static AdManager *s_adManager = nil;
     if (_haveInterstitialAdShow) {
         return;
     }
+#ifdef MODULE_PROMOTION_MANAGER
+    if ([[PromotionManager shareInstance] haveAnythingInShow]) {
+        return;
+    }
+#endif
     // 是否在处理购买操作
 #ifdef MODULE_IAP_MANAGER
     if ([[IAPManager shareInstance] isProcessing]) {
@@ -403,13 +383,6 @@ static AdManager *s_adManager = nil;
     if (_haveInterstitialAdShow) {
         return NO;
     }
-    
-    // 是否在处理购买操作
-#ifdef MODULE_IAP_MANAGER
-    if ([[IAPManager shareInstance] isProcessing]) {
-        return NO;
-    }
-#endif
     
     GADInterstitial *adInterstitial = [self firstAdForKey:adKey];;
     if (adInterstitial == nil) {
@@ -767,6 +740,17 @@ static AdManager *s_adManager = nil;
         // 如果已经点击或，返回
         return;
     }
+#ifdef MODULE_PROMOTION_MANAGER
+    if ([[PromotionManager shareInstance] haveAnythingInShow]) {
+        return;
+    }
+#endif
+    // 是否在处理购买操作
+#ifdef MODULE_IAP_MANAGER
+    if ([[IAPManager shareInstance] isProcessing]) {
+        return;
+    }
+#endif
     if (_reviewHadShow) {
         // 如果已经显示过，按天算
         NSDate *curDate = [NSDate date];
@@ -789,13 +773,6 @@ static AdManager *s_adManager = nil;
     if (_haveInterstitialAdShow) {
         return;
     }
-
-    // 是否在处理购买操作
-#ifdef MODULE_IAP_MANAGER
-    if ([[IAPManager shareInstance] isProcessing]) {
-        return;
-    }
-#endif
     
     triggerEvent(stat_Review, @{@"name":@"显示"});
     _reviewHadShow = YES;
@@ -811,141 +788,6 @@ static AdManager *s_adManager = nil;
     [alertView setTag:ALERT_TAG_START];
     [alertView show];
 }
-
-
-#pragma mark - Promotion
-
-// 获取推广数据
-- (void)fetchPromotionData
-{
-#if (defined(MODULE_WEB_SERVICE) && defined(kServerUrl))
-    NSString *action = SERVER_API_PROMOTION_INFO;
-#ifdef MODULE_WEB_INTERFACE
-    action = [WebInterface latestActionFor:action];
-#endif
-    NSString *serverUrl = [NSString stringWithFormat:@"%@/%@", kServerUrl, action];
-    [MJWebService startGet:serverUrl body:nil success:^(id respond) {
-        LogInfo(@"Receive Promotion Info");
-        [self configPromotionWith:respond];
-        
-    } failure:^(NSError *error) {
-        LogError(@"Fetch promotion data error : %@", error);
-    }];
-#endif
-}
-
-- (void)configPromotionWith:(NSDictionary *)dicPromotionInfo
-{
-    NSUserDefaults *theUserDefault = [NSUserDefaults standardUserDefaults];
-    self.isPromotionClick = [theUserDefault boolForKey:kPromotionIsClick];
-    self.promotionHadShow = [theUserDefault boolForKey:kPromotionHadShow];
-    self.promotionShowCount = [theUserDefault integerForKey:kPromotionShowCount];
-    self.promotionLastShowDate = [theUserDefault objectForKey:kPromotionLastShowTime];
-    self.promotionLastAppId = [theUserDefault stringForKey:kPromotionLastAppId];
-    
-    if (!_isPromotionClick) {
-        _canShowPromotion = YES;
-    }
-    
-    NSString *appId = dicPromotionInfo[@"appId"];
-    
-    if (appId.length == 0) {
-        return;
-    }
-    
-    _dicPromotionInfo = dicPromotionInfo;
-    
-    // 设置appId
-    if (!_promotionLastAppId || ![_promotionLastAppId isEqualToString:appId]) {
-        // 重置数据
-        _promotionLastAppId = appId;
-        [theUserDefault setObject:_promotionLastAppId forKey:kPromotionLastAppId];
-        _isPromotionClick = NO;
-        [theUserDefault removeObjectForKey:kPromotionIsClick];
-        _promotionHadShow = NO;
-        [theUserDefault removeObjectForKey:kPromotionHadShow];
-        _promotionShowCount = 0;
-        [theUserDefault removeObjectForKey:kPromotionShowCount];
-        _promotionLastShowDate = nil;
-        [theUserDefault removeObjectForKey:kPromotionLastShowTime];
-        _canShowPromotion = YES;
-    }
-    
-    // 设置激活次数
-    _promotionActiveCount = PROMOTION_ACTIVE_COUNT;
-    NSNumber *activeCount = dicPromotionInfo[@"activeCount"];
-    if (activeCount) {
-        _promotionActiveCount = [activeCount intValue];
-    }
-
-}
-
-- (void)checkPromotion
-{
-    if (![self.class canShowAd] ) {
-        return;
-    }
-    if (!_canShowPromotion) {
-        return;
-    }
-    if (_haveAlertShow) {
-        return;
-    }
-    if (_isPromotionClick) {
-        // 如果已经点击或，返回
-        return;
-    }
-    
-    if (_promotionHadShow) {
-        // 如果已经显示过，按天算
-        NSDate *curDate = [NSDate date];
-        if (_promotionLastShowDate == nil
-            || [curDate timeIntervalSinceDate:_promotionLastShowDate] > INTERVAL_BETWEEN_REVIEW) {
-            [self showPromotionView];
-        }
-    } else {
-        _promotionShowCount++;
-        if (_promotionShowCount >= _promotionActiveCount) {
-            if ([self showPromotionView]) {
-                _promotionShowCount = 0;
-            } else {
-                _promotionShowCount--;
-            }
-        }
-        [[NSUserDefaults standardUserDefaults] setInteger:_promotionShowCount forKey:kPromotionShowCount];
-    }
-}
-
-- (BOOL)showPromotionView
-{
-    LogTrace(@">>>> Promotion View Show");
-    if (_haveInterstitialAdShow) {
-        return NO;
-    }
-    
-    // 是否在处理购买操作
-#ifdef MODULE_IAP_MANAGER
-    if ([[IAPManager shareInstance] isProcessing]) {
-        return NO;
-    }
-#endif
-    
-    triggerEvent(stat_Promotion, @{@"name":@"显示"});
-    _promotionHadShow = YES;
-    _promotionLastShowDate = [NSDate date];
-    _haveAlertShow = YES;
-    [[NSUserDefaults standardUserDefaults] setBool:_promotionHadShow forKey:kReviewHadShow];
-    [[NSUserDefaults standardUserDefaults] setObject:_promotionLastShowDate forKey:kReviewLastShowTime];
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:_dicPromotionInfo[@"title"]
-                                                        message:_dicPromotionInfo[@"message"]
-                                                       delegate:self
-                                              cancelButtonTitle:@"No, Thanks"
-                                              otherButtonTitles:_dicPromotionInfo[@"go"]?:@"Get Now", nil];
-    [alertView setTag:ALERT_TAG_START+1];
-    [alertView show];
-    return YES;
-}
-
 
 #pragma mark - GADBannerViewDelegate
 
@@ -1144,17 +986,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error
 #endif
         }
         _haveAlertShow = NO;
-    } else if (alertView.tag == ALERT_TAG_START + 1) {
-        if (buttonIndex == 1) {
-            // 点击推广
-            triggerEvent(stat_Promotion, @{@"name":@"点击"});
-            [self showAppStoreWith:_promotionLastAppId];
-            _isPromotionClick = YES;
-            [[NSUserDefaults standardUserDefaults] setBool:_isReviewClick forKey:kPromotionIsClick];
-        }
-        _haveAlertShow = NO;
     }
-    
 }
 
 
@@ -1195,36 +1027,6 @@ didFailToReceiveAdWithError:(GADRequestError *)error
     }
     return topVC;
 #endif
-}
-
-- (void)showAppStoreWith:(NSString *)appId
-{
-    if (appId.length == 0) {
-        return;
-    }
-    
-#if __has_include(<StoreKit/StoreKit.h>)
-    
-    SKStoreProductViewController *storeProductViewController = [[SKStoreProductViewController alloc] init];
-    
-    // Configure View Controller
-    [storeProductViewController setDelegate:self];
-    [storeProductViewController loadProductWithParameters:@{SKStoreProductParameterITunesItemIdentifier:appId} completionBlock:^(BOOL result, NSError *error) {
-        if (error) {
-            NSLog(@"Error %@ with User Info %@.", error, [error userInfo]);
-        } else {
-            // Present Store Product View Controller
-        }
-    }];
-    [[self.class topViewController] presentViewController:storeProductViewController animated:YES completion:nil];
-#endif
-}
-
-#pragma mark - SKStoreProductViewControllerDelegate
-
-- (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController
-{
-    [viewController dismissViewControllerAnimated:YES completion:NULL];
 }
 
 @end
