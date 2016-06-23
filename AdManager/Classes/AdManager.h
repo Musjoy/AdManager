@@ -20,9 +20,13 @@
 #ifndef stat_ShowCountRewardedAd
 #define stat_ShowCountRewardedAd        @"ShowCountRewardedAd"
 #endif
-/// 评论展示点击点击
+/// 评论展示和点击
 #ifndef stat_Review
 #define stat_Review                     @"Review"
+#endif
+/// 推广展示和点击
+#ifndef stat_Promotion
+#define stat_Promotion                  @"Promotion"
 #endif
 #endif
 
@@ -45,6 +49,10 @@
 /** 是否已点击评论弹窗 */
 #define kReviewIsClick      @"ReviewIsClick"
 
+#ifndef SERVER_API_PROMOTION_INFO
+#define SERVER_API_PROMOTION_INFO   @"promotionInfo.json"
+#endif
+
 
 /// 插页广告消失通知
 static NSString *const kNoticAdDismiss  = @"NoticAdDismiss";
@@ -62,6 +70,8 @@ typedef void (^AdVoidBlock)(void);
 
 /// 开始准备广告
 - (void)startPrepare;
+
+- (void)checkAllWhileAppActive;
 
 - (AdInfo *)adInfoForKey:(NSString *)adKey;
 
@@ -109,6 +119,10 @@ typedef void (^AdVoidBlock)(void);
 
 /** 检查评论是否弹出 */
 - (void)checkReviewIsShow;
+
+#pragma mark - Promotion
+
+- (void)checkPromotion;
 
 #pragma mark - Other Function
 
