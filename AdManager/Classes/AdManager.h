@@ -31,6 +31,11 @@
 #define PLIST_AD_LIST   @"ad_list"
 #endif
 
+/// 启动广告 key设置
+#ifndef KEY_AD_INTERSTITIAL_LAUNCH
+#define KEY_AD_INTERSTITIAL_LAUNCH @"KEY_AD_INTERSTITIAL_LAUNCH"
+#endif
+
 /// MoreApps key设置
 #ifndef KEY_AD_MORE_APPS
 #define KEY_AD_MORE_APPS @"KEY_AD_MORE_APPS"
