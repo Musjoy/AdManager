@@ -231,10 +231,18 @@ static AdManager *s_adManager = nil;
     if (aAdInfo == nil) {
         return nil;
     }
-    id aAd = [_dicAds objectForKey:aAdKey];
-    if (aAd) {
-        return aAd;
+    id aAd = nil;
+    if (aAdInfo.adPreloadCount == 1) {
+        aAd = [_dicAds objectForKey:aAdKey];
+        if (aAd) {
+            if ([aAd isKindOfClass:[NSMutableArray alloc]]) {
+                [_dicAds removeObjectForKey:aAdKey];
+            } else {
+                return aAd;
+            }
+        }
     }
+    
     aAd = [self createAdWith:aAdInfo];
     if (aAd) {
         // Native广告只用加载完成了才能放进来
@@ -535,14 +543,12 @@ static AdManager *s_adManager = nil;
     }
     
     // 读取已加载的广告列表
-    NSMutableArray *arrAds = [_dicAds objectForKey:adKey];
-    if (arrAds == nil || arrAds.count == 0) {
+    GADNativeExpressAdView *aNativeAd = [self firstAdForKey:adKey];
+    if (aNativeAd == nil) {
         [self checkPreloadAd:adKey];
         return nil;
     }
-    
-    GADNativeExpressAdView *aNativeAd = [arrAds objectAtIndex:0];
-    [arrAds removeObjectAtIndex:0];
+    [self removeAd:aNativeAd forKey:adKey];
     return aNativeAd;
 }
 
@@ -593,7 +599,7 @@ static AdManager *s_adManager = nil;
         }
         case 4:
         {
-            GADNativeExpressAdView *adNative = [[GADNativeExpressAdView alloc] initWithAdSize:kGADAdSizeBanner];
+            GADNativeExpressAdView *adNative = [[GADNativeExpressAdView alloc] initWithAdSize:GADAdSizeFromCGSize(CGSizeMake(320, 80))];
             adNative.adUnitID = aAdInfo.adId;
             adNative.delegate = self;
             adNative.rootViewController = [[self class] topViewController];
@@ -662,11 +668,25 @@ static AdManager *s_adManager = nil;
     // 读取广告信息，看是否需要继续加载广告
     AdInfo *aAdInfo = [_dicAdInfos objectForKey:adKey];
     if (aAdInfo) {
-        NSMutableArray *arrAds = [_dicAds objectForKey:adKey];
-        if (arrAds == nil
-            || ![arrAds isKindOfClass:[NSMutableArray class]]
-            || arrAds.count < aAdInfo.adPreloadCount) {
-            [self prepareForAd:adKey];
+        if (aAdInfo.adPreloadCount <= 1) {
+            id aAd = [_dicAds objectForKey:adKey];
+            if ([aAd isKindOfClass:[NSMutableArray class]]) {
+                [_dicAds removeObjectForKey:adKey];
+                [self prepareForAd:adKey];
+            }
+        } else {
+            NSMutableArray *arrAds = [_dicAds objectForKey:adKey];
+            if (arrAds && [arrAds isKindOfClass:[NSMutableArray alloc]]) {
+                [_dicAds removeObjectForKey:adKey];
+                arrAds = nil;
+            }
+            if (arrAds == nil) {
+                arrAds = [[NSMutableArray alloc] init];
+                [_dicAds setObject:arrAds forKey:adKey];
+            }
+            if (arrAds.count < aAdInfo.adPreloadCount) {
+                [self prepareForAd:adKey];
+            }
         }
     }
 }
@@ -685,7 +705,7 @@ static AdManager *s_adManager = nil;
                 arrAds = [[NSMutableArray alloc] init];
                 [_dicAds setObject:arrAds forKey:adKey];
             }
-            [arrAds addObject:adKey];
+            [arrAds addObject:aAd];
         }
     }
 }
@@ -947,12 +967,7 @@ static AdManager *s_adManager = nil;
     NSString *adKey = [self adKeyForRequestAd:nativeExpressAdView];
     if (adKey) {
         [_dicAdRequest removeObjectForKey:adKey];
-        NSMutableArray *arrAds = [_dicAds objectForKey:adKey];
-        if (arrAds == nil) {
-            arrAds = [[NSMutableArray alloc] init];
-        }
-        [arrAds addObject:nativeExpressAdView];
-        
+        [self setAd:nativeExpressAdView forKey:adKey];
         [self checkPreloadAd:adKey];
     }
 }
