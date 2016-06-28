@@ -68,7 +68,7 @@ static AdManager *s_adManager = nil;
 
 @interface AdManager ()<GADBannerViewDelegate, GADRewardBasedVideoAdDelegate, GADNativeExpressAdViewDelegate>
 
-
+@property (nonatomic, assign) BOOL removeAdPurchased;           ///< 移除广告是否已购买
 @property (nonatomic, assign) BOOL canShowAd;                   /**< 是否可以显示广告 */
 @property (nonatomic, strong) NSDictionary *dicAdInfos;         /**< 广告信息列表，保存所有广告信息 */
 @property (nonatomic, strong) NSMutableDictionary *dicAds;      /**< 广告列表，保存所有广告 */
@@ -123,6 +123,7 @@ static AdManager *s_adManager = nil;
 #ifdef MODULE_IAP_MANAGER
         [[IAPManager shareInstance] observeProduct:IAP_PRODUCT_REMOVE_ADS purchased:^(BOOL isSucceed, NSString *message, id result) {
             if (isSucceed) {
+                _removeAdPurchased = YES;
                 _canShowAd = NO;
                 [self removePurchaseAds];
             }
@@ -130,6 +131,7 @@ static AdManager *s_adManager = nil;
 #ifdef IAP_PRODUCT_PRO_VERSION
         [[IAPManager shareInstance] observeProduct:IAP_PRODUCT_PRO_VERSION purchased:^(BOOL isSucceed, NSString *message, id result) {
             if (isSucceed) {
+                _removeAdPurchased = YES;
                 _canShowAd = NO;
                 [self removePurchaseAds];
             }
@@ -160,6 +162,10 @@ static AdManager *s_adManager = nil;
 
 - (void)reloadData
 {
+    if (!_removeAdPurchased) {
+        _canShowAd = YES;
+    }
+    
     [_arrNeedLoadAds removeAllObjects];
     // 读取plist文件
     NSDictionary *dicAdKeys = getPlistFileData(PLIST_AD_LIST);
