@@ -676,10 +676,14 @@ static AdManager *s_adManager = nil;
     if (aAdInfo) {
         if (aAdInfo.adPreloadCount <= 1) {
             id aAd = [_dicAds objectForKey:adKey];
-            if ([aAd isKindOfClass:[NSMutableArray class]]) {
-                [_dicAds removeObjectForKey:adKey];
-                [self prepareForAd:adKey];
+            if (aAd) {
+                if (![aAd isKindOfClass:[NSMutableArray class]]) {
+                    return;
+                } else {
+                    [_dicAds removeObjectForKey:adKey];
+                }
             }
+            [self prepareForAd:adKey];
         } else {
             NSMutableArray *arrAds = [_dicAds objectForKey:adKey];
             if (arrAds && [arrAds isKindOfClass:[NSMutableArray alloc]]) {
