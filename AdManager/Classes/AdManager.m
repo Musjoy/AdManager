@@ -75,6 +75,8 @@ static AdManager *s_adManager = nil;
 @property (nonatomic, strong) NSMutableDictionary *dicCallback; ///< banner广告的回调
 @property (nonatomic, strong) NSMutableDictionary *dicAdCounts; ///< 记录对应广告的激活次数等
 @property (nonatomic, strong) NSMutableDictionary *dicAdRequest;    ///< 请求中的ad
+@property (nonatomic, strong) NSMutableDictionary *dicAdSize;    ///< 请求中的ad
+
 
 @property (nonatomic, strong) NSMutableArray *arrNeedLoadAds;   /**< 需要自动加载的广告列表 */
 
@@ -119,6 +121,7 @@ static AdManager *s_adManager = nil;
         _dicCallback = [[NSMutableDictionary alloc] init];
         _dicAdCounts = [[NSMutableDictionary alloc] init];
         _dicAdRequest = [[NSMutableDictionary alloc] init];
+        _dicAdSize = [[NSMutableDictionary alloc] init];
         
 #ifdef MODULE_IAP_MANAGER
         [[IAPManager shareInstance] observeProduct:IAP_PRODUCT_REMOVE_ADS purchased:^(BOOL isSucceed, NSString *message, id result) {
@@ -536,6 +539,51 @@ static AdManager *s_adManager = nil;
 
 #pragma mark - Native Ad
 
+- (void)setNativeAd:(NSString *)adKey withSize:(GADAdSize)aSize
+{
+    if (adKey.length == 0) {
+        return;
+    }
+    NSValue *aValue = [NSValue valueWithBytes:&aSize objCType:@encode(GADAdSize)];
+    [_dicAdSize setObject:aValue forKey:adKey];
+}
+
+- (GADAdSize)sizeForNativeAd:(NSString *)adKey
+{
+    NSValue *aValue = [_dicAdSize objectForKey:adKey];
+    if (aValue) {
+        GADAdSize aSize;
+        [aValue getValue:&aSize];
+        return aSize;
+    }
+    return kGADAdSizeLargeBanner;
+}
+
+- (NSInteger)insertNativeAd:(NSString *)adKey inArray:(NSMutableArray *)arrItems atIndex:(NSInteger)lastAdIndex
+{
+    AdInfo *aAdInfo = [self adInfoForKey:adKey];
+    if (aAdInfo == nil) {
+        return lastAdIndex;
+    }
+    
+    int insertCount = aAdInfo.adActiveCount;
+    if (insertCount < 1) {
+        insertCount = 1;
+    }
+    
+    while (lastAdIndex + insertCount+1 <= arrItems.count) {
+        id adNative = [self popNativeAdForKey:adKey];
+        if (adNative == nil) {
+            return lastAdIndex;
+        }
+        
+        // 插入该Ad
+        lastAdIndex += insertCount+1;
+        [arrItems insertObject:adNative atIndex:lastAdIndex];
+    }
+    return lastAdIndex;
+}
+
 - (GADNativeExpressAdView *)popNativeAdForKey:(NSString *)adKey
 {
     // 是否能显示广告
@@ -555,6 +603,7 @@ static AdManager *s_adManager = nil;
         return nil;
     }
     [self removeAd:aNativeAd forKey:adKey];
+    [self checkPreloadAd:adKey];
     return aNativeAd;
 }
 
@@ -605,7 +654,7 @@ static AdManager *s_adManager = nil;
         }
         case 4:
         {
-            GADNativeExpressAdView *adNative = [[GADNativeExpressAdView alloc] initWithAdSize:GADAdSizeFromCGSize(CGSizeMake(320, 80))];
+            GADNativeExpressAdView *adNative = [[GADNativeExpressAdView alloc] initWithAdSize:[self sizeForNativeAd:aAdInfo.adKey]];
             adNative.adUnitID = aAdInfo.adId;
             adNative.delegate = self;
             adNative.rootViewController = [[self class] topViewController];
@@ -645,6 +694,7 @@ static AdManager *s_adManager = nil;
     }
     return nil;
 }
+
 
 /// 移除被购买的广告
 - (void)removePurchaseAds

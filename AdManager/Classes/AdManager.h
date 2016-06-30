@@ -112,6 +112,10 @@ typedef void (^AdVoidBlock)(void);
 
 #pragma mark - Native Ad
 
+- (void)setNativeAd:(NSString *)adKey withSize:(GADAdSize)aSize;
+
+- (NSInteger)insertNativeAd:(NSString *)adKey inArray:(NSMutableArray *)arrItems atIndex:(NSInteger)lastAdIndex;
+
 - (GADNativeExpressAdView *)popNativeAdForKey:(NSString *)adKey;
 
 #pragma mark - Review
