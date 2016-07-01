@@ -417,7 +417,8 @@ static AdManager *s_adManager = nil;
     }
     triggerEvent(stat_ShowCountInterstitialAd, @{@"name":adName});
 
-
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNoticAdWillShow object:adKey userInfo:@{@"ad":adInterstitial}];
+    
     [adInterstitial presentFromRootViewController:[self.class topViewController]];
     _haveInterstitialAdShow = YES;
     return YES;
@@ -530,6 +531,8 @@ static AdManager *s_adManager = nil;
         NSDictionary *aDic = @{kRewardedCallback:completion};
         [_dicCallback setObject:aDic forKey:adKey];
     }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNoticAdWillShow object:adKey userInfo:@{@"ad":adRewarded}];
     
     [adRewarded presentFromRootViewController:[self.class topViewController]];
     _haveInterstitialAdShow = YES;
@@ -936,15 +939,10 @@ static AdManager *s_adManager = nil;
 - (void)interstitialDidDismissScreen:(GADInterstitial *)ad
 {
     _haveInterstitialAdShow = NO;
-    [self performSelector:@selector(noticAdDismiss) withObject:nil afterDelay:0.5];
     NSString *adKey = [self adKeyForPrepareAd:ad];
     [self removeAd:ad forKey:adKey];
     [self checkPreloadAd:adKey];
-}
-
-- (void)noticAdDismiss
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:kNoticAdDismiss object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNoticAdDismiss object:adKey userInfo:@{@"ad":ad}];
 }
 
 #pragma mark - GADRewardBasedVideoAdDelegate
@@ -989,7 +987,6 @@ static AdManager *s_adManager = nil;
 - (void)rewardBasedVideoAdDidClose:(GADRewardBasedVideoAd *)rewardBasedVideoAd
 {
     _haveInterstitialAdShow = NO;
-    [self performSelector:@selector(noticAdDismiss) withObject:nil afterDelay:0.5];
     NSString *adKey = [self adKeyForPrepareAd:rewardBasedVideoAd];
     if (adKey) {
         NSDictionary *aDic = _dicCallback[adKey];
@@ -1003,6 +1000,7 @@ static AdManager *s_adManager = nil;
         [self removeAd:rewardBasedVideoAd forKey:adKey];
         [self checkPreloadAd:adKey];
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNoticAdDismiss object:adKey userInfo:@{@"ad":rewardBasedVideoAd}];
 }
 
 /// Tells the delegate that the reward based video ad will leave the application.

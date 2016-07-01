@@ -50,7 +50,8 @@
 /** 是否已点击评论弹窗 */
 #define kReviewIsClick      @"ReviewIsClick"
 
-
+/// 插页广告即将显示
+static NSString *const kNoticAdWillShow = @"NoticAdWillShow";
 /// 插页广告消失通知
 static NSString *const kNoticAdDismiss  = @"NoticAdDismiss";
 
