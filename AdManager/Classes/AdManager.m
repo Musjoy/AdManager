@@ -892,6 +892,7 @@ static AdManager *s_adManager = nil;
             receiveBlock();
         }
     }
+    [bannerView setBackgroundColor:[UIColor clearColor]];
 }
 
 /// Tells the delegate that an ad request failed. The failure is normally due to network
