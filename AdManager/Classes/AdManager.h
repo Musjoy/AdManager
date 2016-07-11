@@ -50,12 +50,17 @@
 /** 是否已点击评论弹窗 */
 #define kReviewIsClick      @"ReviewIsClick"
 
+/// 广告重新加载通知
+static NSString *const kNoticAdReload   = @"NoticAdReload";
 /// 插页广告即将显示
 static NSString *const kNoticAdWillShow = @"NoticAdWillShow";
 /// 插页广告消失通知
 static NSString *const kNoticAdDismiss  = @"NoticAdDismiss";
 
+
+
 typedef void (^AdVoidBlock)(void);
+typedef void (^AdBannerBlock)(DFPBannerView *aBannerView);
 
 
 @interface AdManager : NSObject<UIAlertViewDelegate, GADInterstitialDelegate>
@@ -78,11 +83,10 @@ typedef void (^AdVoidBlock)(void);
 #pragma mark - Banner
 
 /// 创建banner广告
-- (DFPBannerView *)createBannerAd:(NSString *)adKey withSize:(GADAdSize)aSize;
-- (DFPBannerView *)createBannerAd:(NSString *)adKey
-                         withSize:(GADAdSize)aSize
-                     receiveBlock:(AdVoidBlock)receiveBlock
-                      removeBlock:(AdVoidBlock)removeBlock;
+- (void)loadBannerAd:(NSString *)adKey
+            withSize:(GADAdSize)aSize
+        receiveBlock:(AdBannerBlock)receiveBlock
+         removeBlock:(AdVoidBlock)removeBlock;
 
 
 

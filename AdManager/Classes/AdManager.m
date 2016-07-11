@@ -79,6 +79,7 @@ static AdManager *s_adManager = nil;
 
 
 @property (nonatomic, strong) NSMutableArray *arrNeedLoadAds;   /**< 需要自动加载的广告列表 */
+@property (nonatomic, strong) NSMutableArray *arrBannerNeedReload;  ///< 需要重新加载的banner
 
 // 评论相关
 @property (nonatomic, assign) BOOL canShowReview;               /**< 是否可以显示评论 */
@@ -122,6 +123,7 @@ static AdManager *s_adManager = nil;
         _dicAdCounts = [[NSMutableDictionary alloc] init];
         _dicAdRequest = [[NSMutableDictionary alloc] init];
         _dicAdSize = [[NSMutableDictionary alloc] init];
+        _arrBannerNeedReload = [[NSMutableArray alloc] init];
         
 #ifdef MODULE_IAP_MANAGER
         [[IAPManager shareInstance] observeProduct:IAP_PRODUCT_REMOVE_ADS purchased:^(BOOL isSucceed, NSString *message, id result) {
@@ -204,6 +206,16 @@ static AdManager *s_adManager = nil;
     } else {
         self.canShowReview = NO;
     }
+    
+    if (_canShowAd && _arrBannerNeedReload.count > 0) {
+        for (NSString *aAdKey in _arrBannerNeedReload) {
+            [self reloadBannerAd:aAdKey];
+        }
+        [_arrBannerNeedReload removeAllObjects];
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:kNoticAdReload object:nil];
+    
 }
 
 #pragma mark - Public
@@ -264,22 +276,28 @@ static AdManager *s_adManager = nil;
 
 #pragma mark - Banner
 
-- (DFPBannerView *)createBannerAd:(NSString *)adKey withSize:(GADAdSize)aSize
+- (void)setAd:(NSString *)adKey withSize:(GADAdSize)aSize
 {
-    return [self createBannerAd:adKey withSize:aSize receiveBlock:NULL removeBlock:NULL];
+    if (adKey.length == 0) {
+        return;
+    }
+    NSValue *aValue = [NSValue valueWithBytes:&aSize objCType:@encode(GADAdSize)];
+    [_dicAdSize setObject:aValue forKey:adKey];
 }
 
-- (DFPBannerView *)createBannerAd:(NSString *)adKey withSize:(GADAdSize)aSize receiveBlock:(AdVoidBlock)receiveBlock removeBlock:(AdVoidBlock)removeBlock
+- (GADAdSize)sizeForAd:(NSString *)adKey
 {
-    DFPBannerView *banner = (DFPBannerView *)[self prepareForAd:adKey];
-    if (banner == nil) {
-        if (_dicAdInfos[adKey]) {
-            triggerEventStr(stat_Error, [adKey stringByAppendingString:@" 无法创建"]);
-            LogError(@"创建banner广告 {%@} 失败", adKey);
-        }        
-        return nil;
+    NSValue *aValue = [_dicAdSize objectForKey:adKey];
+    if (aValue) {
+        GADAdSize aSize;
+        [aValue getValue:&aSize];
+        return aSize;
     }
-    [banner resize:aSize];
+    return kGADAdSizeBanner;
+}
+
+- (void)loadBannerAd:(NSString *)adKey withSize:(GADAdSize)aSize receiveBlock:(AdBannerBlock)receiveBlock removeBlock:(AdVoidBlock)removeBlock
+{
     if (receiveBlock || removeBlock) {
         NSMutableDictionary *aDic = [[NSMutableDictionary alloc] init];
         if (receiveBlock) {
@@ -290,9 +308,35 @@ static AdManager *s_adManager = nil;
         }
         [_dicCallback setObject:aDic forKey:adKey];
     }
+    if (![self canShowAd]) {
+        [_arrBannerNeedReload addObject:adKey];
+        return;
+    }
+    DFPBannerView *banner = (DFPBannerView *)[self prepareForAd:adKey];
+    if (banner == nil) {
+        if (_dicAdInfos[adKey]) {
+            triggerEventStr(stat_Error, [adKey stringByAppendingString:@" 无法创建"]);
+            LogError(@"创建banner广告 {%@} 失败", adKey);
+        }
+        [_arrBannerNeedReload addObject:adKey];
+        return;
+    }
+    [banner resize:aSize];
     [_dicAdRequest setObject:banner forKey:adKey];
     [banner loadRequest:[GADRequest request]];
-    return banner;
+}
+
+/// 重新加载该banner
+- (BOOL)reloadBannerAd:(NSString *)adKey
+{
+    DFPBannerView *banner = (DFPBannerView *)[self prepareForAd:adKey];
+    if (banner == nil) {
+        return NO;
+    }
+    [banner resize:[self sizeForAd:adKey]];
+    [_dicAdRequest setObject:banner forKey:adKey];
+    [banner loadRequest:[GADRequest request]];
+    return YES;
 }
 
 #pragma mark - Interstitial Ad
@@ -887,9 +931,9 @@ static AdManager *s_adManager = nil;
     [_dicAdRequest removeObjectForKey:adKey];
     NSDictionary *dicBlock = _dicCallback[adKey];
     if (dicBlock) {
-        AdVoidBlock receiveBlock = dicBlock[kReceiveCallback];
+        AdBannerBlock receiveBlock = dicBlock[kReceiveCallback];
         if (receiveBlock) {
-            receiveBlock();
+            receiveBlock(bannerView);
         }
     }
     [bannerView setBackgroundColor:[UIColor clearColor]];
