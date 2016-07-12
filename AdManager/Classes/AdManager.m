@@ -68,30 +68,33 @@ static AdManager *s_adManager = nil;
 
 @interface AdManager ()<GADBannerViewDelegate, GADRewardBasedVideoAdDelegate, GADNativeExpressAdViewDelegate>
 
-@property (nonatomic, assign) BOOL removeAdPurchased;           ///< 移除广告是否已购买
-@property (nonatomic, assign) BOOL canShowAd;                   /**< 是否可以显示广告 */
-@property (nonatomic, strong) NSDictionary *dicAdInfos;         /**< 广告信息列表，保存所有广告信息 */
-@property (nonatomic, strong) NSMutableDictionary *dicAds;      /**< 广告列表，保存所有广告 */
-@property (nonatomic, strong) NSMutableDictionary *dicCallback; ///< banner广告的回调
-@property (nonatomic, strong) NSMutableDictionary *dicAdCounts; ///< 记录对应广告的激活次数等
+@property (nonatomic, assign) BOOL removeAdPurchased;               ///< 移除广告是否已购买
+@property (nonatomic, assign) BOOL canShowAd;                       ///< 是否可以显示广告
+@property (nonatomic, strong) NSDictionary *dicAdInfos;             ///< 广告信息列表，保存所有广告信息
+@property (nonatomic, strong) NSMutableDictionary *dicAds;          ///< 广告列表，保存所有广告
+@property (nonatomic, strong) NSMutableDictionary *dicCallback;     ///< banner广告的回调
+@property (nonatomic, strong) NSMutableDictionary *dicAdCounts;     ///< 记录对应广告的激活次数等
 @property (nonatomic, strong) NSMutableDictionary *dicAdRequest;    ///< 请求中的ad
-@property (nonatomic, strong) NSMutableDictionary *dicAdSize;    ///< 请求中的ad
+@property (nonatomic, strong) NSMutableDictionary *dicAdSize;       ///< 请求中的ad
 
 
-@property (nonatomic, strong) NSMutableArray *arrNeedLoadAds;   /**< 需要自动加载的广告列表 */
+@property (nonatomic, strong) NSMutableArray *arrNeedLoadAds;       ///< 需要自动加载的广告列表
 @property (nonatomic, strong) NSMutableArray *arrBannerNeedReload;  ///< 需要重新加载的banner
 
 // 评论相关
-@property (nonatomic, assign) BOOL canShowReview;               /**< 是否可以显示评论 */
-@property (nonatomic, assign) BOOL isReviewClick;               /**< 是否已点击评论 */
-@property (nonatomic, assign) BOOL reviewHadShow;               /**< 评论是否已经显示 */
-@property (nonatomic, assign) NSInteger reviewShowCount;        /**< 未显示过评论是的评论计数 */
-@property (nonatomic, strong) NSDate *reviewLastShowDate;       /**< 评论最后显示时间 */
+@property (nonatomic, assign) BOOL canShowReview;                   ///< 是否可以显示评论
+@property (nonatomic, assign) BOOL isReviewClick;                   ///< 是否已点击评论
+@property (nonatomic, assign) BOOL reviewHadShow;                   ///< 评论是否已经显示
+@property (nonatomic, assign) NSInteger reviewShowCount;            ///< 未显示过评论是的评论计数
+@property (nonatomic, strong) NSDate *reviewLastShowDate;           ///< 评论最后显示时间
 
 
-@property (nonatomic, assign) BOOL haveAlertShow;                ///< 是否有alert显示
+@property (nonatomic, assign) BOOL haveAlertShow;                   ///< 是否有alert显示
 
-@property (nonatomic, assign) BOOL haveInterstitialAdShow;      /**< 是否有插页广告显示 */
+@property (nonatomic, assign) BOOL haveInterstitialAdShow;          ///< 是否有插页广告显示
+
+
+@property (nonatomic, assign) GADAdSize defaultBannerSize;          ///< 默认banner尺寸
 
 @end
 
@@ -144,11 +147,23 @@ static AdManager *s_adManager = nil;
 #endif
 #endif
         
+        // 默认banner尺寸设置
+        CGFloat adWidth = kScreenWidth;
+        UIInterfaceOrientation or = [[UIApplication sharedApplication] statusBarOrientation];
+        if (or == UIInterfaceOrientationLandscapeLeft ||
+            or == UIInterfaceOrientationLandscapeRight) {
+            adWidth = kScreenHeight;
+        }
+        CGFloat adHeight =  adWidth * 50.0 / 320;
+        CGSize size = CGSizeMake(adWidth, adHeight);
+        _defaultBannerSize = GADAdSizeFromCGSize(size);
+        
         // 评论
         self.isReviewClick = [[NSUserDefaults standardUserDefaults] boolForKey:kReviewIsClick];
         self.reviewHadShow = [[NSUserDefaults standardUserDefaults] boolForKey:kReviewHadShow];
         self.reviewShowCount = [[NSUserDefaults standardUserDefaults] integerForKey:kReviewShowCount];
         self.reviewLastShowDate = [[NSUserDefaults standardUserDefaults] objectForKey:kReviewLastShowTime];
+        
         
         [self reloadData];
         
@@ -294,6 +309,13 @@ static AdManager *s_adManager = nil;
         return aSize;
     }
     return kGADAdSizeBanner;
+}
+
+- (void)loadBannerAd:(NSString *)adKey
+        receiveBlock:(AdBannerBlock)receiveBlock
+         removeBlock:(AdVoidBlock)removeBlock
+{
+    [self loadBannerAd:adKey withSize:_defaultBannerSize receiveBlock:receiveBlock removeBlock:removeBlock];
 }
 
 - (void)loadBannerAd:(NSString *)adKey withSize:(GADAdSize)aSize receiveBlock:(AdBannerBlock)receiveBlock removeBlock:(AdVoidBlock)removeBlock

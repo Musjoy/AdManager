@@ -68,14 +68,13 @@ typedef void (^AdBannerBlock)(DFPBannerView *aBannerView);
 
 + (instancetype)shareInstance;
 
-
+/// 是否可以显示广告，尽量少使用该方法
 + (BOOL)canShowAd;
 
-/// 开始准备广告
-- (void)startPrepare;
-
+/// 在App进入前台是检查所有事件
 - (void)checkAllWhileAppActive;
 
+/// 判断是否有广告或者评论显示
 - (BOOL)haveAnythingInShow;
 
 - (AdInfo *)adInfoForKey:(NSString *)adKey;
@@ -83,6 +82,9 @@ typedef void (^AdBannerBlock)(DFPBannerView *aBannerView);
 #pragma mark - Banner
 
 /// 创建banner广告
+- (void)loadBannerAd:(NSString *)adKey
+        receiveBlock:(AdBannerBlock)receiveBlock
+         removeBlock:(AdVoidBlock)removeBlock;
 - (void)loadBannerAd:(NSString *)adKey
             withSize:(GADAdSize)aSize
         receiveBlock:(AdBannerBlock)receiveBlock
