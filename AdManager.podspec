@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AdManager"
-  s.version          = "0.1.5"
+  s.version          = "0.1.6"
   s.summary          = "This is an manager for ads."
 
   s.homepage         = "https://github.com/Musjoy/AdManager"
@@ -26,7 +26,7 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  s.dependency 'Google-Mobile-Ads-SDK', '~> 7.8.1'
+  s.dependency 'Google-Mobile-Ads-SDK', '~> 7.0'
   s.dependency 'ModuleCapability', '~> 0.1.2'
   s.prefix_header_contents = '#import "ModuleCapability.h"'
 

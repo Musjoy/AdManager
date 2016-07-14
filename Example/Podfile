@@ -1,10 +1,10 @@
 #use_frameworks!
 
-target 'AdManager_Example', :exclusive => true do
+target 'AdManager_Example' do
   pod 'AdManager', :path => '../'
 end
 
-target 'AdManager_Tests', :exclusive => true do
+target 'AdManager_Tests' do
   pod 'AdManager', :path => '../'
 
   
