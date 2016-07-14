@@ -271,7 +271,7 @@ static AdManager *s_adManager = nil;
     if (aAdInfo.adPreloadCount == 1) {
         aAd = [_dicAds objectForKey:aAdKey];
         if (aAd) {
-            if ([aAd isKindOfClass:[NSMutableArray alloc]]) {
+            if ([aAd isKindOfClass:[NSMutableArray class]]) {
                 [_dicAds removeObjectForKey:aAdKey];
             } else {
                 return aAd;
@@ -662,7 +662,7 @@ static AdManager *s_adManager = nil;
     // 是否有该广告信息
     AdInfo *aAdInfo = _dicAdInfos[adKey];
     if (aAdInfo == nil) {
-        return NO;
+        return nil;
     }
     
     // 读取已加载的广告列表
@@ -805,7 +805,7 @@ static AdManager *s_adManager = nil;
             [self prepareForAd:adKey];
         } else {
             NSMutableArray *arrAds = [_dicAds objectForKey:adKey];
-            if (arrAds && [arrAds isKindOfClass:[NSMutableArray alloc]]) {
+            if (arrAds && [arrAds isKindOfClass:[NSMutableArray class]]) {
                 [_dicAds removeObjectForKey:adKey];
                 arrAds = nil;
             }
@@ -955,7 +955,7 @@ static AdManager *s_adManager = nil;
     if (dicBlock) {
         AdBannerBlock receiveBlock = dicBlock[kReceiveCallback];
         if (receiveBlock) {
-            receiveBlock(bannerView);
+            receiveBlock((DFPBannerView *)bannerView);
         }
     }
     [bannerView setBackgroundColor:[UIColor clearColor]];
