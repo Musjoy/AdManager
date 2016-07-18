@@ -805,7 +805,7 @@ static AdManager *s_adManager = nil;
             [self prepareForAd:adKey];
         } else {
             NSMutableArray *arrAds = [_dicAds objectForKey:adKey];
-            if (arrAds && [arrAds isKindOfClass:[NSMutableArray class]]) {
+            if (arrAds && ![arrAds isKindOfClass:[NSMutableArray class]]) {
                 [_dicAds removeObjectForKey:adKey];
                 arrAds = nil;
             }
