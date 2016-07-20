@@ -170,7 +170,7 @@ static AdManager *s_adManager = nil;
 #ifdef MODULE_FILE_SOURCE
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(reloadData)
-                                                     name:[kNoticPlistUpdate stringByAppendingString:PLIST_AD_LIST]
+                                                     name:[kNoticPlistUpdate stringByAppendingString:FILE_NAME_AD_LIST]
                                                    object:nil];
 #endif
         
@@ -188,7 +188,7 @@ static AdManager *s_adManager = nil;
     
     [_arrNeedLoadAds removeAllObjects];
     // 读取plist文件
-    NSDictionary *dicAdKeys = getPlistFileData(PLIST_AD_LIST);
+    NSDictionary *dicAdKeys = getFileData(FILE_NAME_AD_LIST);
     if (dicAdKeys == nil
         || (dicAdKeys && ![dicAdKeys isKindOfClass:[NSDictionary class]])) {
         self.canShowAd = NO;

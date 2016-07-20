@@ -10,7 +10,8 @@
 #import <GoogleMobileAds/GoogleMobileAds.h>
 #import "AdInfo.h"
 
-#ifdef MODULE_UM_ANALYSE
+// 友盟统计
+#ifdef HEADER_UM_ANALYSE
 #import HEADER_UM_ANALYSE
 /// 插页广告
 #ifndef stat_ShowCountInterstitialAd
@@ -26,9 +27,9 @@
 #endif
 #endif
 
-/// Plist文件名设置
-#ifndef PLIST_AD_LIST
-#define PLIST_AD_LIST   @"ad_list"
+/// 广告列表文件名设置
+#ifndef FILE_NAME_AD_LIST
+#define FILE_NAME_AD_LIST   @"ad_list"
 #endif
 
 /// 启动广告 key设置
@@ -80,6 +81,11 @@ typedef void (^AdBannerBlock)(DFPBannerView *aBannerView);
 - (AdInfo *)adInfoForKey:(NSString *)adKey;
 
 #pragma mark - Banner
+
+/// 设置banner广告的大小
+- (void)setAd:(NSString *)adKey withSize:(GADAdSize)aSize;
+/// 获取banner广告的大小
+- (GADAdSize)sizeForAd:(NSString *)adKey;
 
 /// 创建banner广告
 - (void)loadBannerAd:(NSString *)adKey
