@@ -308,7 +308,7 @@ static AdManager *s_adManager = nil;
         [aValue getValue:&aSize];
         return aSize;
     }
-    return kGADAdSizeBanner;
+    return _defaultBannerSize;
 }
 
 - (void)loadBannerAd:(NSString *)adKey

@@ -1,5 +1,5 @@
 PODS:
-  - AdManager (0.1.5):
+  - AdManager (0.1.6):
     - Google-Mobile-Ads-SDK (~> 7.0)
     - ModuleCapability (~> 0.1.2)
   - Google-Mobile-Ads-SDK (7.9.0)
@@ -13,7 +13,7 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  AdManager: 61261f513b3cdd4ad0623551af2a64bea61b7791
+  AdManager: da8df5e38bff001fe5975246bf082658095c8ecb
   Google-Mobile-Ads-SDK: 1b7257c6dde53a587adb28f45365535e6122c48a
   ModuleCapability: 35cea7154ff855362682e90ecf1be529a533c931
 
