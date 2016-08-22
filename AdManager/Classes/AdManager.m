@@ -602,6 +602,8 @@ static AdManager *s_adManager = nil;
     
     [adRewarded presentFromRootViewController:[self.class topViewController]];
     _haveInterstitialAdShow = YES;
+    NSMutableDictionary *countInfo = _dicAdCounts[adKey];
+    countInfo[kAdFirstShowTime] = [NSDate date];
     return YES;
 }
 
