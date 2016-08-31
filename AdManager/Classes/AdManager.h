@@ -131,6 +131,8 @@ typedef void (^AdBannerBlock)(DFPBannerView *aBannerView);
 
 - (GADNativeExpressAdView *)popNativeAdForKey:(NSString *)adKey;
 
+- (BOOL)isNativeAd:(id)aItem;
+
 #pragma mark - Review
 
 /** 检查评论是否弹出 */

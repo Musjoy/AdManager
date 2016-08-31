@@ -678,6 +678,13 @@ static AdManager *s_adManager = nil;
     return aNativeAd;
 }
 
+- (BOOL)isNativeAd:(id)aItem
+{
+    if ([aItem isKindOfClass:[GADNativeExpressAdView class]]) {
+        return YES;
+    }
+    return NO;
+}
 
 
 #pragma mark - Private
